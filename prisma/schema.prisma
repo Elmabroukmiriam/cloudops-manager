@@ -1,0 +1,140 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Role {
+  ADMIN
+  DEVOPS
+  VIEWER
+}
+
+enum ServerStatus {
+  ONLINE
+  OFFLINE
+  MAINTENANCE
+}
+
+enum AppStatus {
+  RUNNING
+  STOPPED
+  FAILED
+}
+
+enum Severity {
+  LOW
+  MEDIUM
+  HIGH
+  CRITICAL
+}
+
+enum AlertStatus {
+  OPEN
+  ACKNOWLEDGED
+  RESOLVED
+}
+
+enum MetricType {
+  CPU
+  RAM
+}
+
+model User {
+  id          Int             @id @default(autoincrement())
+  email       String          @unique
+  password    String
+  fullName    String
+  role        Role            @default(VIEWER)
+  createdAt   DateTime        @default(now())
+  memberships ProjectMember[]
+}
+
+model Project {
+  id           Int             @id @default(autoincrement())
+  name         String
+  description  String?
+  createdAt    DateTime        @default(now())
+  members      ProjectMember[]
+  environments Environment[]
+}
+
+model ProjectMember {
+  id        Int     @id @default(autoincrement())
+  user      User    @relation(fields: [userId], references: [id])
+  userId    Int
+  project   Project @relation(fields: [projectId], references: [id])
+  projectId Int
+
+  @@unique([userId, projectId])
+}
+
+model Environment {
+  id        Int      @id @default(autoincrement())
+  name      String
+  project   Project  @relation(fields: [projectId], references: [id])
+  projectId Int
+  servers   Server[]
+}
+
+model Server {
+  id            Int           @id @default(autoincrement())
+  name          String
+  provider      String
+  region        String
+  cpu           Int
+  ram           Int
+  storage       Int
+  ipAddress     String
+  status        ServerStatus  @default(ONLINE)
+  environment   Environment   @relation(fields: [environmentId], references: [id])
+  environmentId Int
+  applications  Application[]
+  metrics       Metric[]
+  alertRules    AlertRule[]
+  alerts        Alert[]
+}
+
+model Application {
+  id       Int       @id @default(autoincrement())
+  name     String
+  version  String
+  status   AppStatus @default(RUNNING)
+  server   Server    @relation(fields: [serverId], references: [id])
+  serverId Int
+}
+
+model Metric {
+  id         Int        @id @default(autoincrement())
+  type       MetricType
+  value      Float
+  recordedAt DateTime   @default(now())
+  server     Server     @relation(fields: [serverId], references: [id])
+  serverId   Int
+}
+
+model AlertRule {
+  id        Int        @id @default(autoincrement())
+  metric    MetricType
+  threshold Float
+  severity  Severity
+  server    Server     @relation(fields: [serverId], references: [id])
+  serverId  Int
+  alerts    Alert[]
+}
+
+model Alert {
+  id         Int         @id @default(autoincrement())
+  message    String
+  severity   Severity
+  status     AlertStatus @default(OPEN)
+  createdAt  DateTime    @default(now())
+  resolvedAt DateTime?
+  rule       AlertRule?  @relation(fields: [ruleId], references: [id])
+  ruleId     Int?
+  server     Server      @relation(fields: [serverId], references: [id])
+  serverId   Int
+}
