@@ -8,6 +8,8 @@ import { ServersModule } from './servers/servers.module';
 import { ApplicationsModule } from './applications/applications.module';
 import { ProjectsModule } from './projects/projects.module';
 import { EnvironmentsModule } from './environments/environments.module';
+import { MetricsModule } from './metrics/metrics.module';
+import { AlertsModule } from './alerts/alerts.module';
 
 @Module({
   imports: [
@@ -18,6 +20,8 @@ import { EnvironmentsModule } from './environments/environments.module';
     ApplicationsModule,
     ProjectsModule,
     EnvironmentsModule,
+    MetricsModule,
+    AlertsModule,
   ],
   controllers: [AppController],
   providers: [AppService],
