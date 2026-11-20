@@ -10,6 +10,7 @@ import { ProjectsModule } from './projects/projects.module';
 import { EnvironmentsModule } from './environments/environments.module';
 import { MetricsModule } from './metrics/metrics.module';
 import { AlertsModule } from './alerts/alerts.module';
+import { DashboardModule } from './dashboard/dashboard.module';
 
 @Module({
   imports: [
@@ -22,6 +23,7 @@ import { AlertsModule } from './alerts/alerts.module';
     EnvironmentsModule,
     MetricsModule,
     AlertsModule,
+    DashboardModule,
   ],
   controllers: [AppController],
   providers: [AppService],
